@@ -22,6 +22,7 @@ class TadanoPlayer(agent.Agent):
 
     # TODO: Implement tadano.py
     def get_action(self, nr, hands, knowledge, trash, played, board, valid_actions, hints, hits, cards_left):
+        # checks what hints it knows
         for player,hand in enumerate(hands):
             for card_index,_ in enumerate(hand):
                 if (player,card_index) not in self.hints:
@@ -33,18 +34,19 @@ class TadanoPlayer(agent.Agent):
                 known[card_index] = str(list(map(format_hint, self.hints[h])))
         self.explanation = [["hints received:"] + known]
 
+        # keeps track of knowledge of what it knows, what's on the board, and what other players have
         my_knowledge = knowledge[nr]
         
+        # holds all potential discardable cards in its hand, play immediately if there is a playable card
+        # this only works if it definitely knows what cards are in its hand
         potential_discards = []
         for i,k in enumerate(my_knowledge):
             if util.is_playable(k, board):
                 return Action(PLAY, card_index=i)
             if util.is_useless(k, board):    
                 potential_discards.append(i)
-                
-        if potential_discards:
-            return Action(DISCARD, card_index=random.choice(potential_discards))
-         
+        
+        # playables [] holds an array of cards that other players have that should be put on the board
         playables = []        
         for player,hand in enumerate(hands):
             if player != nr:
@@ -52,6 +54,7 @@ class TadanoPlayer(agent.Agent):
                     if card.is_playable(board):                              
                         playables.append((player,card_index))
         
+        # sorting playables somehow; looks at other players cards and tracks which cards need to be played next
         playables.sort(key=lambda which: -hands[which[0]][which[1]].rank)
         while playables and hints > 0:
             player,card_index = playables[0]
@@ -60,6 +63,7 @@ class TadanoPlayer(agent.Agent):
             real_rank = hands[player][card_index].rank
             k = knowledge[player][card_index]
             
+            # going to randomly choose whether to hint a color or rank
             hinttype = [HINT_COLOR, HINT_RANK]
             
             
@@ -97,7 +101,13 @@ class TadanoPlayer(agent.Agent):
                 
             return hintgiven
 
-        return random.choice(util.filter_actions(DISCARD, valid_actions))
+        # if there is anything that could be discardable, discard it
+        if potential_discards:
+            return Action(DISCARD, card_index=random.choice(potential_discards))
+
+        # if every card in the hand is completely unknown, discard oldest card
+        return Action(DISCARD, card_index = 2)
+        # return random.choice(util.filter_actions(DISCARD, valid_actions))
 
     def inform(self, action, player):
         if action.type in [PLAY, DISCARD]:
