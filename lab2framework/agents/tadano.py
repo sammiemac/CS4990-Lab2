@@ -2,11 +2,6 @@ from hanabi import *
 import util
 import agent
 import random
-
-class InnerStatePlayer(agent.Agent):
-    def __init__(self, name, pnr):
-        self.name = name
-        self.explanation = []
         
 def format_hint(h):
     if h == HINT_COLOR:
@@ -20,7 +15,6 @@ class TadanoPlayer(agent.Agent):
         self.pnr = pnr
         self.explanation = []
 
-    # TODO: Implement tadano.py
     def get_action(self, nr, hands, knowledge, trash, played, board, valid_actions, hints, hits, cards_left):
         # checks what hints it knows
         for player,hand in enumerate(hands):
@@ -107,7 +101,6 @@ class TadanoPlayer(agent.Agent):
 
         # if every card in the hand is completely unknown, discard the middle card
         return Action(DISCARD, card_index = 2)
-        # return random.choice(util.filter_actions(DISCARD, valid_actions))
 
     def inform(self, action, player):
         if action.type in [PLAY, DISCARD]:
