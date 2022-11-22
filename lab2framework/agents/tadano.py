@@ -105,7 +105,7 @@ class TadanoPlayer(agent.Agent):
         if potential_discards:
             return Action(DISCARD, card_index=random.choice(potential_discards))
 
-        # if every card in the hand is completely unknown, discard oldest card
+        # if every card in the hand is completely unknown, discard the middle card
         return Action(DISCARD, card_index = 2)
         # return random.choice(util.filter_actions(DISCARD, valid_actions))
 
