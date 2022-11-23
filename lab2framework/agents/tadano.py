@@ -28,7 +28,7 @@ class TadanoPlayer(agent.Agent):
                 known[card_index] = str(list(map(format_hint, self.hints[h])))
         self.explanation = [["hints received:"] + known]
 
-        # keeps track of knowledge of what it knows, what's on the board, and what other players have
+        # keeps track of what it knows, what's on the board, and what other players have
         my_knowledge = knowledge[nr]
         
         # holds all potential discardable cards in its hand, play immediately if there is a playable card
@@ -60,7 +60,6 @@ class TadanoPlayer(agent.Agent):
             # going to randomly choose whether to hint a color or rank
             hinttype = [HINT_COLOR, HINT_RANK]
             
-            
             for h in self.hints[(player,card_index)]:
                 hinttype.remove(h)
             
@@ -80,26 +79,12 @@ class TadanoPlayer(agent.Agent):
                 return Action(HINT_COLOR, player=player, color=hands[player][card_index].color)
             
             playables = playables[1:]
- 
-        if hints > 0:
-            hints = util.filter_actions(HINT_COLOR, valid_actions) + util.filter_actions(HINT_RANK, valid_actions)
-            hintgiven = random.choice(hints)
-            if hintgiven.type == HINT_COLOR:
-                for i,card in enumerate(hands[hintgiven.player]):
-                    if card.color == hintgiven.color:
-                        self.hints[(hintgiven.player,i)].add(HINT_COLOR)
-            else:
-                for i,card in enumerate(hands[hintgiven.player]):
-                    if card.rank == hintgiven.rank:
-                        self.hints[(hintgiven.player,i)].add(HINT_RANK)
-                
-            return hintgiven
 
         # if there is anything that could be discardable, discard it
         if potential_discards:
             return Action(DISCARD, card_index=random.choice(potential_discards))
 
-        # if every card in the hand is completely unknown, discard the middle card
+        # if there are no other moves available, discard the middle card
         return Action(DISCARD, card_index = 2)
 
     def inform(self, action, player):
